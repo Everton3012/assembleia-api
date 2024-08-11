@@ -8,7 +8,7 @@ import { ErrorResponse } from 'src/common/error.resource';
 @Controller('pautas/:id/voto')
 export class VotoController {
   constructor(
-    private readonly pautaService: PautasService,
+    private readonly pautasService: PautasService,
     private readonly votoService: VotoService,
   ) {}
 
@@ -18,7 +18,7 @@ export class VotoController {
     @Body() resouce: RegistroVotoResource,
     @Res() res: Response,
   ) {
-    const pauta = await this.pautaService.findById(idPauta);
+    const pauta = await this.pautasService.findById(idPauta);
 
     if (!pauta) {
       return res
@@ -31,6 +31,11 @@ export class VotoController {
       resouce.opacaoVoto,
     );
 
-    if (result) return res.status(HttpStatus.ACCEPTED).send();
+    if (result.isError()) {
+      const error = result.error;
+      return res.status(error.status).send(new ErrorResponse(error.message));
+    }
+
+    return res.status(HttpStatus.ACCEPTED).send();
   }
 }
